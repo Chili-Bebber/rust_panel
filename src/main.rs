@@ -15,15 +15,15 @@ fn main() {
         "^i(/home/dexter/.scripts/bash_panel/icons/tag_9.xbm)"
     ];
 
-    let base_bg = "^bg(#2c2020)";
+    let base_bg = "^bg(#0f0401)";
 
-    let active_fg = "^fg(#8cac63)";
-    let active_bg = "^bg(#422f2f)";
+    let active_fg = "^fg(#ffeedd)";
+    let active_bg = &base_bg;
 
-    let inactive_fg = "^fg(#64848b)";
+    let inactive_fg = "^fg(#927162)";
     let inactive_bg = &base_bg;
 
-    let empty_fg = "^fg(#8b7d66)";
+    let empty_fg = "^fg(#241410)";
     let empty_bg = &base_bg;
 
     let active_1_fg = "^fg(#BB0000)";
@@ -66,32 +66,36 @@ fn main() {
                     .unwrap() 
                     as u8 -48;
                 let active_tag_index: usize = active_tag as usize -1;
-                let echo_arg = 
-                    format!("{}{}{}  ", 
-                        active_bg, 
-                        active_fg, 
-                        tag_icons[active_tag_index]
-                    );
-                let echo_path =
-                    format!("> /tmp/bar_pipe_{}", active_tag);
-                Command::new("/bin/bash")
-                    .arg("-c")
-                    .arg(format!("echo \"{}\" {}", echo_arg, echo_path))
-                    .spawn()
-                    .expect("oopsie woopsie uwu");    
+                if active_tag_index <= 9 {
+                    let echo_arg = 
+                        format!("{}{}{}  ", 
+                            active_bg, 
+                            active_fg, 
+                            tag_icons[active_tag_index]
+                        );
+                    let echo_path =
+                        format!("> /tmp/bar_pipe_{}", active_tag);
+                    Command::new("/bin/bash")
+                        .arg("-c")
+                        .arg(format!("echo \"{}\" {}", echo_arg, echo_path))
+                        .spawn()
+                        .expect("oopsie woopsie uwu");
+                }
                 let prev_tag_index: usize = prev_tag as usize -1;
-                let prev_tag_flag: usize = tag_flags[prev_tag_index];
-                let echo_arg = 
-                    format!("{}{}{}   ", fg_colours[prev_tag_flag], 
-                            bg_colours[prev_tag_flag], 
-                            tag_icons[prev_tag_index]);
-                let echo_path =
-                    format!("> /tmp/bar_pipe_{}", prev_tag);
-                Command::new("sh")
-                    .arg("-c")
-                    .arg(format!("echo \"{}\" {}", echo_arg, echo_path))
-                    .spawn()
-                    .expect("Failed to execute echo");
+                if prev_tag_index <= 9 {
+                    let prev_tag_flag: usize = tag_flags[prev_tag_index];
+                    let echo_arg = 
+                        format!("{}{}{}   ", fg_colours[prev_tag_flag], 
+                                bg_colours[prev_tag_flag], 
+                                tag_icons[prev_tag_index]);
+                    let echo_path =
+                        format!("> /tmp/bar_pipe_{}", prev_tag);
+                    Command::new("sh")
+                        .arg("-c")
+                        .arg(format!("echo \"{}\" {}", echo_arg, echo_path))
+                        .spawn()
+                        .expect("Failed to execute echo");
+                }
                 prev_tag = active_tag;
             }
             //println!("[TAG_CHANGED]: tag changed to: {}", active_tag);
@@ -121,7 +125,6 @@ fn main() {
                     _ if status != '#' && status != '%' => tag_flags[i] = 1,
                     _ => { ; }
                 }
-                println!("{}", tag_flags[i]);
                 if i+1 != active_tag as usize 
                     && tag_flags[i] != prev_tag_flags[i] {
                     let echo_arg = 
